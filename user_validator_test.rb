@@ -20,4 +20,9 @@ class UserValidatorTest < Minitest::Test
     assert_equal(u.invalid_phone_rows.count, 3)
   end
 
+  def test_correct_number_of_invalid_rows_based_on_age
+    u = UserValidator.new('homework.csv')
+
+    assert_equal(u.invalid_age_rows.count, 0)
+  end
 end

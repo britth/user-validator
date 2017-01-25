@@ -15,6 +15,14 @@ class UserValidator
             end
   end
 
+  def is_number?(value)
+    true if Float(value) rescue false
+  end
+
+  def is_not_number?(value)
+    false if Float(value) rescue true
+  end
+
   def header
     @header
   end
@@ -31,6 +39,10 @@ class UserValidator
     @all_rows.select{|x| invalid_phone?(x)}.map{|x| [x.to_s, errors(x)]}
   end
 
+  def invalid_age_rows
+    @all_rows.select{|x| invalid_age?(x)}.map{|x| [x.to_s, errors(x)]}
+  end
+
   def invalid?(row)
     invalid_phone?(row) || invalid_age?(row)
   end
@@ -40,7 +52,8 @@ class UserValidator
   end
 
   def invalid_age?(row)
-    row.at(header.first.index('age')).to_s.match(/^\d{1,3}$/).nil?
+    age = row.at(header.first.index('age'))
+    is_not_number?(age) || age.to_s.match(/^[1]?[0-9][0-9]$/).nil?
   end
 
   def errors(row)
@@ -51,10 +64,12 @@ class UserValidator
     if invalid_phone?(row)
       errors << 'Invalid phone'
     end
+    errors
   end
 
 end
 
 u = UserValidator.new('homework.csv')
 
-puts u.invalid_rows
+# puts u.invalid_rows
+# # puts u.all_rows.map{|x| x[2]}
