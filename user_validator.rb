@@ -127,7 +127,7 @@ class UserValidator
   end
 
 end
-
-u = UserValidator.new('homework.csv')
-
-puts u.overall_summary
+#
+# u = UserValidator.new('homework.csv')
+#
+# puts u.overall_summary
