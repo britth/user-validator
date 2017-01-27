@@ -50,10 +50,10 @@ class UserValidator
       "\n\n"
 
     puts "The following row number#{plural(invalid_rows.count)} " +
-      "#{were_was(invalid_rows.count)} invalid: #{invalid_row_numbers}\n\n"
+      "#{were_was(invalid_rows.count)} invalid: #{invalid_row_numbers}"
 
     invalid_rows_and_errors.map{|r|
-      r.first.join(", ").to_s + "\n"+ r.last.to_s + "\n\n"
+      "\n"+r.first.join(", ").to_s + "\n"+ r.last.to_s
     }
   end
 
@@ -74,19 +74,23 @@ class UserValidator
   end
 
   def invalid_phone_rows
-    @all_rows.select{|r| invalid_phone?(r)}.map{|r| [r.to_s, errors(r)]}
+    @all_rows.select{|r| invalid_phone?(r)}
   end
 
   def invalid_age_rows
-    @all_rows.select{|r| invalid_age?(r)}.map{|r| [r.to_s, errors(r)]}
+    @all_rows.select{|r| invalid_age?(r)}
   end
 
   def invalid_join_date_rows
-    @all_rows.select{|r| invalid_date?(r)}.map{|r| [r.to_s, errors(r)]}
+    @all_rows.select{|r| invalid_date?(r)}
+  end
+
+  def invalid_email_rows
+    @all_rows.select{|r| invalid_email?(r)}
   end
 
   def invalid?(row)
-    invalid_phone?(row) || invalid_age?(row) || invalid_date?(row)
+    invalid_phone?(row) || invalid_age?(row) || invalid_date?(row) || invalid_email?(row)
   end
 
   def invalid_phone?(row)
@@ -111,6 +115,18 @@ class UserValidator
       nil?
   end
 
+  def invalid_email?(row)
+    e = row.at(header.first.index('email'))
+    s =  "!#$%&'*+-/=?^_`{|}~"
+    e.match(/^((\w+\.{0,1}\w+)+|([\w#{s}]+))@\w([\-\w]|(\w\.\w))*\.\w+$/).nil?
+
+  end
+
+  def invalid_password?(row)
+    pw = row.at(header.first.index('password'))
+    pw.match(/^$/).nil?
+  end
+
 
   def errors(row)
     errors = []
@@ -123,11 +139,14 @@ class UserValidator
     if invalid_date?(row)
       errors << 'Invalid date'
     end
+    if invalid_email?(row)
+      errors << 'Invalid email'
+    end
     errors
   end
 
 end
-# 
+
 # u = UserValidator.new('homework.csv')
 #
 # puts u.overall_summary
