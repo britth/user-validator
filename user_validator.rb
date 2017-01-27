@@ -32,21 +32,15 @@ class UserValidator
   end
 
   def plural(value)
-    if value != 1
-      's'
-    end
+    value != 1 ? 's' : ''
   end
 
   def were_was(value)
-    if value != 1
-      'were'
-    else
-      'was'
-    end
+    value != 1 ? 'were' : 'was'
   end
 
   def overall_summary
-    puts "There were #{valid_rows.count} valid row#{plural(valid_rows.count)}."+
+    puts "There #{were_was(valid_rows.count)} #{valid_rows.count} valid row#{plural(valid_rows.count)}."+
       "\n\n"
 
     puts "The following row number#{plural(invalid_rows.count)} " +
@@ -89,8 +83,14 @@ class UserValidator
     @all_rows.select{|r| invalid_email?(r)}
   end
 
+  def invalid_password_rows
+    @all_rows.select{|r| invalid_password?(r)}
+  end
+
   def invalid?(row)
-    invalid_phone?(row) || invalid_age?(row) || invalid_date?(row) || invalid_email?(row)
+    invalid_phone?(row) || invalid_age?(row) ||
+      invalid_date?(row) || invalid_email?(row) ||
+      invalid_password?(row)
   end
 
   def invalid_phone?(row)
@@ -123,10 +123,21 @@ class UserValidator
   end
 
   def invalid_password?(row)
-    pw = row.at(header.first.index('password'))
-    pw.match(/^$/).nil?
-  end
+    pw = row.at(header.first.index('password')).to_s
+    s =  "!#$%&'*+-/=?^_`{|}~"
+    alpha_lc_num = /((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[#{s}]*)/
+    sp_num_alpha_l = /((?=.*[#{s}])(?=.*[0-9])(?=.*[a-z])[A-Z]*)/
+    alpha_c_num_sp = /((?=.[A-Z])(?=.[0-9])(?=.[#{s}])[a-z]*)/
 
+    rg = pw.match(/(#{alpha_lc_num}|#{sp_num_alpha_l}|#{alpha_c_num_sp}).*/)
+    if rg.nil?
+      true
+    elsif rg[0].match(/^\S*$/) && rg[0].length >= 6
+      false
+    else
+      true
+    end
+  end
 
   def errors(row)
     errors = []
@@ -141,6 +152,9 @@ class UserValidator
     end
     if invalid_email?(row)
       errors << 'Invalid email'
+    end
+    if invalid_password?(row)
+      errors << 'Invalid password'
     end
     errors
   end

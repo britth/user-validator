@@ -44,8 +44,13 @@ class UserValidatorTest < Minitest::Test
     assert_equal(@s.invalid_email_rows.count, 2)
   end
 
+  def test_correct_number_of_invalid_rows_based_on_password
+    assert_equal(@u.invalid_password_rows.count, 5)
+    assert_equal(@s.invalid_password_rows.count, 5)
+  end
+
   def test_correct_number_of_all_invalid_rows
-    assert_equal(@u.invalid_rows.count, 5)
-    assert_equal(@s.invalid_rows.count, 5)
+    assert_equal(@u.invalid_rows.count, 7)
+    assert_equal(@s.invalid_rows.count, 7)
   end
 end
