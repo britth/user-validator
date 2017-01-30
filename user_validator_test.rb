@@ -18,9 +18,9 @@ class UserValidatorTest < Minitest::Test
   def test_correct_number_of_data_rows_are_returned
     #u = UserValidator.new('homework.csv')
 
-    assert_equal(@u.all_rows.count, 7)
+    assert_equal(@u.all_rows.count, 9)
     assert_equal(@u.header.count, 1)
-    assert_equal(@s.all_rows.count, 7)
+    assert_equal(@s.all_rows.count, 9)
     assert_equal(@s.header.count, 1)
   end
 

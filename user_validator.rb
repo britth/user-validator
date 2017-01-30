@@ -53,6 +53,17 @@ class UserValidator
 
   def valid_rows
     @all_rows.select{|r| not invalid?(r)}.map{|r| r.to_s}
+    format_values.map{|r| r.to_s}
+  end
+
+  def format_values
+    v = @all_rows.select{|r| not invalid?(r)}
+    v.map do |r|
+      p = r.at(header.first.index('phone')).gsub(/\D/, '')
+      idx = header.first.index('phone')
+      r[idx] = '('+p[0..2]+') '+p[3..5]+'-'+p[6..-1]
+    end
+    v
   end
 
   def invalid_rows
@@ -164,3 +175,7 @@ end
 # u = UserValidator.new('homework.csv')
 #
 # puts u.overall_summary
+#
+# puts u.valid_rows
+#
+# puts u.format_phone
