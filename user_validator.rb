@@ -42,6 +42,8 @@ class UserValidator
   def overall_summary
     puts "There #{were_was(valid_rows.count)} #{valid_rows.count} valid row#{plural(valid_rows.count)}."+
       "\n\n"
+    puts valid_rows
+    puts "\n"
 
     puts "The following row number#{plural(invalid_rows.count)} " +
       "#{were_was(invalid_rows.count)} invalid: #{invalid_row_numbers}"
