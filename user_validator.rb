@@ -8,10 +8,17 @@ class UserValidator
                   header_converters: :symbol }.merge(Hash.new) )
   end
 
+  @@special_characters = "!#$%&'*+-/=?^_`{|}~"
+  @@phone_regex = /^(?:|[\(])[1-9]\d{2}(?:[\)] |[\)]|-|.|)[1-9]\d{2}(?:-|.|)\d{4}$/
+  @@age_regex = /^[1]?[0-9][0-9]$/
+  @@day_month_year_regex = /^([0][1-9]|[1][0-2]|\d{1})[-\/.]([0-2][0-9]|[3][0-1]|\d{1})[-\/.](\d{2}|\d{4})$/
+  @@year_month_day_regex = /^\d{4}[-\/.]([0][1-9]|[1][0-2]|\d{1})[-\/.]([0-2][0-9]|[3][0-1]|\d{1})$/
+  @@email_regex = /^((\w+\.{0,1}\w+)+|([\w#{@@special_characters}]+))@\w([\-\w]|(\w\.\w))*\.\w+$/
+
   def data
-    i = 0
+    row_id = 0
     @data.each do |row|
-      row[:id] = i+=1
+      row[:id] = row_id+=1
     end
   end
 
@@ -25,39 +32,29 @@ class UserValidator
 
   def invalid_phone?(row)
     phone = row[:phone].to_s
-    phone.
-      match(/^(?:|[\(])[1-9]\d{2}(?:[\)] |[\)]|-|.|)[1-9]\d{2}(?:-|.|)\d{4}$/).
-      nil?
+    phone.match(@@phone_regex).nil?
   end
 
   def invalid_age?(row)
     age = row[:age].to_s
-    is_not_number?(age) || age.to_s.match(/^[1]?[0-9][0-9]$/).nil?
+    is_not_number?(age) || age.to_s.match(@@age_regex).nil?
   end
 
   def invalid_date?(row)
     date = row[:joined].to_s
-    date.
-      match(/^([0][1-9]|[1][0-2]|\d{1})[-\/.]([0-2][0-9]|[3][0-1]|\d{1})[-\/.](\d{2}|\d{4})$/).
-      nil? &&
-    date.
-      match(/^\d{4}[-\/.]([0][1-9]|[1][0-2]|\d{1})[-\/.]([0-2][0-9]|[3][0-1]|\d{1})$/).
-      nil?
+    date.match(@@day_month_year_regex).nil? && date.match(@@year_month_day_regex).nil?
   end
 
   def invalid_email?(row)
-    e = row[:email].to_s
-    s =  "!#$%&'*+-/=?^_`{|}~"
-    e.match(/^((\w+\.{0,1}\w+)+|([\w#{s}]+))@\w([\-\w]|(\w\.\w))*\.\w+$/).nil?
-
+    email_ad = row[:email].to_s
+    email_ad.match(@@email_regex).nil?
   end
 
   def invalid_password?(row)
     pw = row[:password].to_s
-    s =  "!#$%&'*+-/=?^_`{|}~"
-    alpha_lc_num = /((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[#{s}]*)/
-    sp_num_alpha_l = /((?=.*[#{s}])(?=.*[0-9])(?=.*[a-z])[A-Z]*)/
-    alpha_c_num_sp = /((?=.[A-Z])(?=.[0-9])(?=.[#{s}])[a-z]*)/
+    alpha_lc_num = /((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[#{@@special_characters}]*)/
+    sp_num_alpha_l = /((?=.*[#{@@special_characters}])(?=.*[0-9])(?=.*[a-z])[A-Z]*)/
+    alpha_c_num_sp = /((?=.[A-Z])(?=.[0-9])(?=.[#{@@special_characters}])[a-z]*)/
 
     rg = pw.match(/(#{alpha_lc_num}|#{sp_num_alpha_l}|#{alpha_c_num_sp}).*/)
     if rg.nil?
@@ -69,16 +66,6 @@ class UserValidator
     end
   end
 
-  def errors(row)
-    errors = []
-    errors << 'Invalid age' if invalid_age?(row)
-    errors << 'Invalid phone' if invalid_phone?(row)
-    errors << 'Invalid date' if invalid_date?(row)
-    errors << 'Invalid email' if invalid_email?(row)
-    errors << 'Invalid password' if invalid_password?(row)
-    errors
-  end
-
   def print_errors(row)
     errors = []
     errors << 'Invalid age: ' + row[:age].to_s if invalid_age?(row)
@@ -87,44 +74,44 @@ class UserValidator
     errors << 'Invalid email: ' + row[:email].to_s if invalid_email?(row)
     errors << 'Invalid password: ' + row[:password].to_s if invalid_password?(row)
     errors
+
   end
 
   def invalid?(row)
-    invalid_phone?(row) || invalid_age?(row) ||
-      invalid_date?(row) || invalid_email?(row) ||
-      invalid_password?(row)
+    invalid_phone?(row) || invalid_age?(row) || invalid_date?(row) ||
+    invalid_email?(row) || invalid_password?(row)
   end
 
   def invalid_rows
-    data.select { |r| invalid?(r) }
+    data.select { |row| invalid?(row) }
   end
 
-  def invalid_rows_and_errors
-    invalid_rows.map { |r| [errors(r), r] }
+  def valid_rows
+    data.select { |row| not invalid?(row) }
   end
 
   def invalid_row_numbers
-    invalid_rows.map { |r| r[:id] }.join(", ")
+    invalid_rows.map { |row| row[:id] }.join(", ")
   end
 
   def invalid_phone_rows
-    data.select { |r| invalid_phone?(r) }
+    data.select { |row| invalid_phone?(row) }
   end
 
   def invalid_age_rows
-    data.select { |r| invalid_age?(r) }
+    data.select { |row| invalid_age?(row) }
   end
 
   def invalid_join_date_rows
-    data.select { |r| invalid_date?(r) }
+    data.select { |row| invalid_date?(row) }
   end
 
   def invalid_email_rows
-    data.select { |r| invalid_email?(r) }
+    data.select { |row| invalid_email?(row) }
   end
 
   def invalid_password_rows
-    data.select { |r| invalid_password?(r) }
+    data.select { |row| invalid_password?(row) }
   end
 
   def plural(value)
@@ -138,41 +125,60 @@ class UserValidator
   def overall_summary
     puts "There #{were_was(valid_rows.count)} #{valid_rows.count} valid row#{plural(valid_rows.count)}."+
       "\n\n"
-    puts valid_rows
+    puts valid_rows.map{|row| valid_formatting(row)}
     puts "\n"
 
     puts "The following row number#{plural(invalid_rows.count)} " +
       "#{were_was(invalid_rows.count)} invalid: #{invalid_row_numbers}"
 
-    # invalid_rows_and_errors.map{|r|
-    #   puts "\n"+r.first.join(", ").to_s + "\n"+ r.last.to_s
-    # }
-    final = invalid_rows.map do |row|
-      "\n"+row[:id].to_s+" "+row[:name].to_s+"\n"+print_errors(row).map{|x| x.to_s}.join("\n")
-    end
-    puts final
+    invalid_rows_with_errors = invalid_rows.map{|row| "\n" + row[:id].to_s +
+      " " + row[:name].to_s + "\n" + print_errors(row).map { |x| x.to_s }.join("\n")
+    }
+    puts invalid_rows_with_errors
   end
 
-  def format_values
-    valid_rows = @data.select{|row| not invalid?(row)}
-    valid_rows.map do |row|
+  def format_dates_with_leading_zero(number_s)
+    if number_s.length == 2
+      number_s
+    else
+      '0' + number_s
+    end
+  end
+
+  def format_year_with_leading_values(year_s)
+    current_year_s = Time.now.year.to_s
+
+    if year_s.length == 2
+      if current_year_s[-2..-1].to_i < year_s.to_i
+        (current_year_s[0..1].to_i - 1).to_s + year_s
+      else
+        current_year_s[0..1].to_s + year_s
+      end
+    else
+      year_s
+    end
+  end
+
+  def valid_formatting(row) #format_values
       stripped_phone = row[:phone].gsub(/\D/, '')
       row[:phone] = '(' + stripped_phone[0..2] + ') ' +
                     stripped_phone[3..5] + '-' + stripped_phone[6..-1]
-      row
-      # d = r.at(header.first.index('date'))
-      # d_stripped = r.at(header.first.index('date')).gsub(/\D/, '')
-      # d_idx = header.first.index('date')
-      # if not d.match(/^([0][1-9]|[1][0-2]|\d{1})[-\/.]([0-2][0-9]|[3][0-1]|\d{1})[-\/.](\d{2}|\d{4})$/).nil?
-      #   r[d_idx] =
-      # else
-      #   r[d_idx] =
-    end
-  end
 
-  def valid_rows
-    @data.select { |r| not invalid?(r) }.map { |r| r.to_s }
-    format_values.map { |r| r.to_s }
+      stripped_date = row[:joined].to_s.scan(/([\d]+)+/).flatten
+      stripped_date_one = stripped_date.at(0)
+      stripped_date_two = stripped_date.at(1)
+      stripped_date_three = stripped_date.at(2)
+
+      if row[:joined].match(@@day_month_year_regex)
+        row[:joined] = format_year_with_leading_values(stripped_date_three) +
+                        '-' + format_dates_with_leading_zero(stripped_date_one) +
+                        '-' + format_dates_with_leading_zero(stripped_date_two)
+      else
+        row[:joined] = stripped_date_one + '-' +
+                        format_dates_with_leading_zero(stripped_date_two) +
+                        '-' + format_dates_with_leading_zero(stripped_date_three)
+      end
+    row
   end
 end
 

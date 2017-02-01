@@ -21,27 +21,27 @@ class UserValidatorTest < Minitest::Test
   end
 
   def test_correct_number_of_invalid_rows_based_on_age
-    assert_equal(@validator_1.invalid_age_rows.count, 0)
-    assert_equal(@validator_2.invalid_age_rows.count, 0)
+    assert_equal(0, @validator_1.invalid_age_rows.count)
+    assert_equal(0, @validator_2.invalid_age_rows.count)
   end
 
   def test_correct_number_of_invalid_rows_based_on_join_date
-    assert_equal(@validator_1.invalid_join_date_rows.count, 4)
-    assert_equal(@validator_2.invalid_join_date_rows.count, 4)
+    assert_equal(4, @validator_1.invalid_join_date_rows.count)
+    assert_equal(4, @validator_2.invalid_join_date_rows.count)
   end
 
   def test_correct_number_of_invalid_rows_based_on_email
-    assert_equal(@validator_1.invalid_email_rows.count, 2)
-    assert_equal(@validator_2.invalid_email_rows.count, 2)
+    assert_equal(2, @validator_1.invalid_email_rows.count)
+    assert_equal(2, @validator_2.invalid_email_rows.count)
   end
 
   def test_correct_number_of_invalid_rows_based_on_password
-    assert_equal(@validator_1.invalid_password_rows.count, 5)
-    assert_equal(@validator_2.invalid_password_rows.count, 5)
+    assert_equal(5, @validator_1.invalid_password_rows.count)
+    assert_equal(5, @validator_2.invalid_password_rows.count)
   end
 
   def test_correct_number_of_all_invalid_rows
-    assert_equal(@validator_1.invalid_rows.count, 7)
-    assert_equal(@validator_2.invalid_rows.count, 7)
+    assert_equal(7, @validator_1.invalid_rows.count)
+    assert_equal(7, @validator_2.invalid_rows.count)
   end
 end
