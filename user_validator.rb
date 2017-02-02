@@ -11,7 +11,7 @@ class UserValidator
   @@special_characters = "!#$%&'*+-/=?^_`{|}~"
   @@phone_regex = /^(?:|[\(])[1-9]\d{2}(?:[\)] |[\)]|-|.|)[1-9]\d{2}(?:-|.|)\d{4}$/
   @@age_regex = /^[1]?[0-9][0-9]$/
-  @@day_month_year_regex = /^([0][1-9]|[1][0-2]|\d{1})[-\/.]([0-2][0-9]|[3][0-1]|\d{1})[-\/.](\d{2}|\d{4})$/
+  @@month_day_year_regex = /^([0][1-9]|[1][0-2]|\d{1})[-\/.]([0-2][0-9]|[3][0-1]|\d{1})[-\/.](\d{2}|\d{4})$/
   @@year_month_day_regex = /^\d{4}[-\/.]([0][1-9]|[1][0-2]|\d{1})[-\/.]([0-2][0-9]|[3][0-1]|\d{1})$/
   @@email_regex = /^((\w+\.{0,1}\w+)+|([\w#{@@special_characters}]+))@\w([\-\w]|(\w\.\w))*\.\w+$/
 
@@ -20,10 +20,6 @@ class UserValidator
     @data.each do |row|
       row[:id] = row_id+=1
     end
-  end
-
-  def is_number?(value)
-    true if Float(value) rescue false
   end
 
   def is_not_number?(value)
@@ -42,7 +38,7 @@ class UserValidator
 
   def invalid_date?(row)
     date = row[:joined].to_s
-    date.match(@@day_month_year_regex).nil? && date.match(@@year_month_day_regex).nil?
+    date.match(@@month_day_year_regex).nil? && date.match(@@year_month_day_regex).nil?
   end
 
   def invalid_email?(row)
@@ -59,11 +55,10 @@ class UserValidator
     rg = pw.match(/(#{alpha_lc_num}|#{sp_num_alpha_l}|#{alpha_c_num_sp}).*/)
     if rg.nil?
       true
-    elsif rg[0].match(/^\S*$/) && rg[0].length >= 6
-      false
     else
-      true
+      (rg[0].match(/^\S*$/) && rg[0].length >= 6) ? false : true
     end
+
   end
 
   def print_errors(row)
@@ -145,43 +140,45 @@ class UserValidator
     end
   end
 
-  def format_year_with_leading_values(year_s)
+  def format_year_with_leading_values_test(year_s, month, day)
     current_year_s = Time.now.year.to_s
+    current_month = Time.now.month
+    current_day = Time.now.day
+
 
     if year_s.length == 2
-      if current_year_s[-2..-1].to_i < year_s.to_i
-        (current_year_s[0..1].to_i - 1).to_s + year_s
-      else
-        current_year_s[0..1].to_s + year_s
-      end
+      current_year_s[-2..-1].to_i < year_s.to_i ||
+      (current_year_s[-2..-1].to_i == year_s.to_i &&
+      (current_month < month || (current_month <= month && current_day < day))) ?
+        (current_year_s[0..1].to_i - 1).to_s + year_s : current_year_s[0..1].to_s + year_s
     else
       year_s
     end
   end
 
-  def valid_formatting(row) #format_values
-      stripped_phone = row[:phone].gsub(/\D/, '')
-      row[:phone] = '(' + stripped_phone[0..2] + ') ' +
+  def valid_formatting(row)
+    stripped_phone = row[:phone].gsub(/\D/, '')
+    row[:phone] = '(' + stripped_phone[0..2] + ') ' +
                     stripped_phone[3..5] + '-' + stripped_phone[6..-1]
 
-      stripped_date = row[:joined].to_s.scan(/([\d]+)+/).flatten
-      stripped_date_one = stripped_date.at(0)
-      stripped_date_two = stripped_date.at(1)
-      stripped_date_three = stripped_date.at(2)
+    stripped_date = row[:joined].to_s.scan(/([\d]+)+/).flatten
+    stripped_date_one = stripped_date.at(0)
+    stripped_date_two = stripped_date.at(1)
+    stripped_date_three = stripped_date.at(2)
 
-      if row[:joined].match(@@day_month_year_regex)
-        row[:joined] = format_year_with_leading_values(stripped_date_three) +
-                        '-' + format_dates_with_leading_zero(stripped_date_one) +
-                        '-' + format_dates_with_leading_zero(stripped_date_two)
-      else
-        row[:joined] = stripped_date_one + '-' +
-                        format_dates_with_leading_zero(stripped_date_two) +
-                        '-' + format_dates_with_leading_zero(stripped_date_three)
-      end
+    if row[:joined].match(@@month_day_year_regex)
+      row[:joined] = format_year_with_leading_values_test(stripped_date_three, stripped_date_one.to_i, stripped_date_two.to_i) +
+                      '-' + format_dates_with_leading_zero(stripped_date_one) +
+                      '-' + format_dates_with_leading_zero(stripped_date_two)
+    else
+      row[:joined] = stripped_date_one + '-' +
+                      format_dates_with_leading_zero(stripped_date_two) +
+                      '-' + format_dates_with_leading_zero(stripped_date_three)
+    end
     row
   end
 end
-
+# 
 # u = UserValidator.new('homework.csv')
 #
 # puts u.overall_summary
