@@ -52,8 +52,3 @@ class UserValidatorSummary
     puts invalid_rows_with_errors
   end
 end
-
-user_validator = UserValidator.new('homework.csv')
-formatter = UserValidatorFormatter.new(user_validator: user_validator)
-user_validator_summary = UserValidatorSummary.new(user_validator: user_validator, formatter: formatter)
-puts user_validator_summary.overall_summary
