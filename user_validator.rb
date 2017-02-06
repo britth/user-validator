@@ -140,11 +140,10 @@ class UserValidator
     end
   end
 
-  def format_year_with_leading_values_test(year_s, month, day)
+  def format_year_with_leading_values(year_s, month, day)
     current_year_s = Time.now.year.to_s
     current_month = Time.now.month
     current_day = Time.now.day
-
 
     if year_s.length == 2
       current_year_s[-2..-1].to_i < year_s.to_i ||
@@ -167,7 +166,7 @@ class UserValidator
     stripped_date_three = stripped_date.at(2)
 
     if row[:joined].match(@@month_day_year_regex)
-      row[:joined] = format_year_with_leading_values_test(stripped_date_three, stripped_date_one.to_i, stripped_date_two.to_i) +
+      row[:joined] = format_year_with_leading_values(stripped_date_three, stripped_date_one.to_i, stripped_date_two.to_i) +
                       '-' + format_dates_with_leading_zero(stripped_date_one) +
                       '-' + format_dates_with_leading_zero(stripped_date_two)
     else
@@ -178,7 +177,7 @@ class UserValidator
     row
   end
 end
-# 
+#
 # u = UserValidator.new('homework.csv')
 #
 # puts u.overall_summary
