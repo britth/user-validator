@@ -34,13 +34,17 @@ class UserValidatorSummary
   end
 
   def overall_summary
-    puts "There #{were_was(user_validator.valid_rows.count)} #{user_validator.valid_rows.count} valid row#{plural(user_validator.valid_rows.count)}."+
+    puts "There #{were_was(user_validator.valid_rows.count)} " +
+      "#{user_validator.valid_rows.count} valid " +
+      "row#{plural(user_validator.valid_rows.count)}."+
       "\n\n"
     puts user_validator.valid_rows.map{|row| formatter.valid_formatting(row)}
     puts "\n"
 
-    puts "The following row number#{plural(user_validator.invalid_rows.count)} " +
-      "#{were_was(user_validator.invalid_rows.count)} invalid: #{user_validator.invalid_row_numbers}"
+    puts "The following row " +
+          "number#{plural(user_validator.invalid_rows.count)} " +
+          "#{were_was(user_validator.invalid_rows.count)} invalid: " +
+          "#{user_validator.invalid_row_numbers}"
 
     invalid_rows_with_errors = user_validator.invalid_rows.map{|row| "\n" + row[:id].to_s +
       " " + row[:name].to_s + "\n" + print_errors(row).map { |x| x.to_s }.join("\n")
@@ -48,8 +52,8 @@ class UserValidatorSummary
     puts invalid_rows_with_errors
   end
 end
-# 
-# user_validator = UserValidator.new('homework.csv')
-# formatter = UserValidatorFormatter.new(user_validator: user_validator)
-# user_validator_summary = UserValidatorSummary.new(user_validator: user_validator, formatter: formatter)
-# puts user_validator_summary.overall_summary
+
+user_validator = UserValidator.new('homework.csv')
+formatter = UserValidatorFormatter.new(user_validator: user_validator)
+user_validator_summary = UserValidatorSummary.new(user_validator: user_validator, formatter: formatter)
+puts user_validator_summary.overall_summary
